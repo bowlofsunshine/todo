@@ -16,32 +16,34 @@
       </md-card-content>
       <md-card-content>
         <md-list class="todos md-layout-item">
-          <md-list-item v-for="todo in todos" :key="todo.id">
-            <md-field v-if="todo.id == editedTodoId">
-              <md-input
-                type="text"
-                v-model="todo.label"
-                :placeholder="'edit todo '+ todo.label"
-                @keydown.enter="stopEdit(todo)"
-              />
-              <md-button id="save" @click="stopEdit(todo)">save</md-button>
-            </md-field>
-            <md-list-item v-else class="todo">
-              <md-checkbox
-                class="md-primary"
-                v-model="todo.completed"
-                true-value="true"
-                false-value="false"
-              />
-              <span @dblclick="editTodo(todo)">{{todo.label}}</span>
-              <md-button class="md-icon-button md-accent" id="delete" @click="removeTodo(todo)">
-                <md-icon>delete</md-icon>
-              </md-button>
-              <md-button class="md-icon-button md-primary" id="item" @click="editTodo(todo)">
-                <md-icon>edit</md-icon>
-              </md-button>
+          <draggable v-model="todo" group="people" @start="drag=true" @end="drag=false">
+            <md-list-item v-for="todo in todos" :key="todo.id">
+              <md-field v-if="todo.id == editedTodoId">
+                <md-input
+                  type="text"
+                  v-model="todo.label"
+                  :placeholder="'edit todo '+ todo.label"
+                  @keydown.enter="stopEdit(todo)"
+                />
+                <md-button id="save" @click="stopEdit(todo)">save</md-button>
+              </md-field>
+              <md-list-item v-else class="todo">
+                <md-checkbox
+                  class="md-primary"
+                  v-model="todo.completed"
+                  true-value="true"
+                  false-value="false"
+                />
+                <span @dblclick="editTodo(todo)">{{todo.label}}</span>
+                <md-button class="md-icon-button md-accent" id="delete" @click="removeTodo(todo)">
+                  <md-icon>clear</md-icon>
+                </md-button>
+                <md-button class="md-icon-button md-primary" id="item" @click="editTodo(todo)">
+                  <md-icon>edit</md-icon>
+                </md-button>
+              </md-list-item>
             </md-list-item>
-          </md-list-item>
+          </draggable>
         </md-list>
       </md-card-content>
     </md-card>
@@ -49,7 +51,11 @@
 </template>
 
 <script>
+import draggable from "vuedraggable";
 export default {
+  components: {
+    draggable
+  },
   data() {
     return {
       todos: [],
@@ -83,8 +89,10 @@ export default {
 <style lang="scss" scoped>
 $color-primary: #568bf5;
 $color-secondary: #f5565e;
+$font-primary: Roboto;
 
 .md-card {
+  font-family: $font-primary;
   min-width: 50% !important;
   margin-left: auto;
   margin-right: auto;
@@ -146,5 +154,9 @@ $color-secondary: #f5565e;
 }
 .todo {
   margin-top: -10px;
+}
+
+.md-card .md-title {
+  margin-left: 8px;
 }
 </style>
