@@ -1,5 +1,5 @@
 <template>
-  <div class="body md-layout md-gutter md-alignment-center">
+  <div id="app" class="body md-layout md-gutter md-alignment-center">
     <md-card>
       <md-card-header>
         <div class="md-title">Todo List</div>
@@ -16,7 +16,7 @@
       </md-card-content>
       <md-card-content>
         <md-list class="todos md-layout-item">
-          <draggable v-model="todo" group="people" @start="drag=true" @end="drag=false">
+          <draggable v-model="todos" group="people" @start="drag=true" @end="drag=false">
             <md-list-item v-for="todo in todos" :key="todo.id">
               <md-field v-if="todo.id == editedTodoId">
                 <md-input
@@ -60,27 +60,55 @@ export default {
     return {
       todos: [],
       currentTodo: "",
-      editedTodoId: null
+      editedTodoId: null,
+      completed: [],
+      dataFields: ["todos", "completed"]
     };
   },
+  mounted() {
+    this.dataFields.forEach(field => this.checkStorage(field));
+  },
   methods: {
+    checkStorage(key) {
+      if (localStorage.getItem(key)) {
+        try {
+          this[key] = JSON.parse(localStorage.getItem(key));
+        } catch (e) {
+          localStorage.removeItem(key);
+        }
+      }
+    },
+    addTodo() {
+      this.todos.push({
+        id: this.todos.length,
+        label: this.currentTodo
+      });
+      this.currentTodo = "";
+      this.saveTodos();
+    },
     editTodo(todo) {
       this.editedTodoId = todo.id;
     },
     stopEdit() {
       this.editedTodoId = null;
+      this.saveTodos();
     },
-    removeTodo(todo) {
-      var index = this.todos.indexOf(todo);
-      this.todos.splice(index, 1);
+    removeTodo({ i, isCompleted }) {
+      if (isCompleted) {
+        this.completed.splice(i, 1);
+      } else {
+        this.todos.splice(i, 1);
+      }
+      this.saveTodos();
     },
-    addTodo() {
-      this.todos.push({
-        id: this.todos.length,
-        label: this.currentTodo,
-        completed: false
-      });
-      this.currentTodo = "";
+    completeTodo(index) {
+      this.completed.push(this.todos.splice(index, 1)[0]);
+      this.saveTodos();
+    },
+    saveTodos() {
+      this.dataFields.forEach(field =>
+        localStorage.setItem(field, JSON.stringify(this[field]))
+      );
     }
   }
 };
